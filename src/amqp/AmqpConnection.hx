@@ -18,12 +18,12 @@ extern class AmqpConnection
 	/**
 	 * Resolves to an open Channel (The callback version returns the channel; but it is not usable before the callback has been invoked). May fail if there are no more channels available (i.e., if there are already channelMax channels open).
 	 */
-	function createChannel():Promise<AmqpChannel>
+	function createChannel():Promise<AmqpChannel>;
 	
 	/**
 	 * Open a fresh channel, switched to “confirmation mode”.
 	 */
-	function createConfirmChannel():Promise<AmqpConfirmChannel>
+	function createConfirmChannel():Promise<AmqpConfirmChannel>;
 }
 
 @:enum abstract AmqpConnectionEvents(String){

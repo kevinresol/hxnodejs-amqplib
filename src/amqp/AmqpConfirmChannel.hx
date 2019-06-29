@@ -1,6 +1,7 @@
 package amqp;
 
 import amqp.AmqpChannel;
+import js.lib.Promise;
 
 /**
  * ...
