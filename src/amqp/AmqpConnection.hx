@@ -13,7 +13,7 @@ extern class AmqpConnection
 	 * Although it’s not strictly necessary, it will avoid some warnings in the server log if you close the connection before exiting
 	 */
 	function close():Promise<{}>;
-	function on(event:AmqpConnectionEvents, ?callback:(Dynamic->Void)):Void;
+	function on(event:AmqpConnectionEvents, callback:(Dynamic->Void)):Void;
 	
 	/**
 	 * Resolves to an open Channel (The callback version returns the channel; but it is not usable before the callback has been invoked). May fail if there are no more channels available (i.e., if there are already channelMax channels open).
