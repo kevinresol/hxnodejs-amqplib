@@ -1,5 +1,6 @@
 package amqp;
 
+import js.lib.Promise;
 import haxe.extern.EitherType;
 
 /**
@@ -28,7 +29,7 @@ extern class AmqpChannelBase
 
 There’s not usually any reason to close a channel rather than continuing to use it until you’re ready to close the connection altogether. However, the lifetimes of consumers are scoped to channels, and thereby other things such as exclusive locks on queues, so it is occasionally worth being deliberate about opening and closing channels.
 	 */
-	function close(?callback:(AmqpError->Void)):Void;
+	function close():Promise<{}>;
 	function on(event:AmqpChannelEvents, ?callback:(Void->Void)):Void;
 	
 	
@@ -37,30 +38,30 @@ There’s not usually any reason to close a channel rather than continuing to us
 	 * Assert a queue into existence. This operation is idempotent given identical arguments; however, it will bork the channel if the queue already exists but has different properties (values supplied in the arguments field may or may not count for borking purposes; check the borker’s, I mean broker’s, documentation).
 	 * queue is a string; if you supply an empty string or other falsey value (including null and undefined), the server will create a random name for you.
 	 */
-	function assertQueue(?queue:String, ?options:AmpqAssertQueueOptions, ?callback:(AmqpError->AmqpQueueState-> Void)):Void;
+	function assertQueue(?queue:String, ?options:AmpqAssertQueueOptions):Promise<AmqpQueueState>;
 	/**
 	 * Check whether a queue exists. This will bork the channel if the named queue doesn’t exist; if it does exist, you go through to the next round! There’s no options, unlike #assertQueue(), just the queue name. The reply from the server is the same as for #assertQueue().
 	 */
-	function checkQueue(queue:String, ?callback:(AmqpError->AmqpQueueState-> Void)):Void;
+	function checkQueue(queue:String):Promise<AmqpQueueState>;
 	/**
 	 * Delete the queue named. Naming a queue that doesn’t exist will result in the server closing the channel, to teach you a lesson (except in RabbitMQ version 3.2.0 and after1).
 	 * You should leave out the options altogether if you want to delete the queue unconditionally.
 	 * The server reply contains a single field, messageCount, with the number of messages deleted or dead-lettered along with the queue.
 	 */
-	function deleteQueue(queue:String, ?options:AmpqDeleteQueueOptions, ?callback:(AmqpError->AmqpRemoveResult->Void)):Void;
+	function deleteQueue(queue:String, ?options:AmpqDeleteQueueOptions):Promise<AmqpRemoveResult>;
 	/**
 	 * Remove all undelivered messages from the queue named. Note that this won’t remove messages that have been delivered but not yet acknowledged; they will remain, and may be requeued under some circumstances (e.g., if the channel to which they were delivered closes without acknowledging them).
 	 */
-	function purgeQueue(queue:String, ?callback:(AmqpError->AmqpRemoveResult->Void)):Void;
+	function purgeQueue(queue:String):Promise<AmqpRemoveResult>;
 	/**
 	 * Assert a routing path from an exchange to a queue: the exchange named by source will relay messages to the queue named, according to the type of the exchange and the pattern given. The RabbitMQ tutorials give a good account of how routing works in AMQP.
 	 * 'args' is an object containing extra arguments that may be required for the particular exchange type (for which, see your server’s documentation). It may be omitted if it’s the last argument, which is equivalent to an empty object.
 	 */
-	function bindQueue(queue:String, source:String, pattern:String, ?args:{}, ?callback:(AmqpError->{}->Void)):Void;
+	function bindQueue(queue:String, source:String, pattern:String, ?args:{}):Promise<{}>;
 	/**
 	 * Remove a routing path between the queue named and the exchange named as source with the pattern and arguments given. Omitting args is equivalent to supplying an empty object (no arguments). Beware: attempting to unbind when there is no such binding may result in a punitive error (the AMQP specification says it’s a connection-killing mistake; RabbitMQ before version 3.2.0 softens this to a channel error, and from version 3.2.0, doesn’t treat it as an error at all1. Good ol’ RabbitMQ).
 	 */
-	function unbindQueue(queue:String, source:String, pattern:String, ?args:{}, ?callback:(AmqpError->{}->Void)):Void;
+	function unbindQueue(queue:String, source:String, pattern:String, ?args:{}):Promise<{}>;
 	
 	
 	
@@ -69,46 +70,46 @@ There’s not usually any reason to close a channel rather than continuing to us
 	 * Assert an exchange into existence. As with queues, if the exchange exists already and has properties different to those supplied, the channel will ‘splode; fields in the arguments object may or may not be ‘splodey, depending on the type of exchange. Unlike queues, you must supply a name, and it can’t be the empty string. You must also supply an exchange type, which determines how messages will be routed through the exchange.
 	 * NB There is just one RabbitMQ extension pertaining to exchanges in general (alternateExchange); however, specific exchange types may use the arguments table to supply parameters.
 	 */
-	function assertExchange(exchange:String, type:String, ?options:AmpqAssertExchangeOptions, ?callback:(AmqpError->{exchange:String}->Void)):Void;
+	function assertExchange(exchange:String, type:String, ?options:AmpqAssertExchangeOptions):Promise<{exchange:String}>;
 	/**
 	 * Check that an exchange exists. If it doesn’t exist, the channel will be closed with an error. If it does exist, happy days.
 	 */
-	function checkExchange(exchange:String, ?callback:(AmqpError->AmqpExchangeState-> Void)):Void;
+	function checkExchange(exchange:String):Promise<AmqpExchangeState>;
 	
 	/**
 	 * Delete an exchange.
 	 * If the exchange does not exist, a channel error is raised (RabbitMQ version 3.2.0 and after will not raise an error).
 	 */
-	function deleteExchange(exchange:String, ?options:AmpqDeleteExchangeOptions, ?callback:(AmqpError->{}->Void)):Void;
+	function deleteExchange(exchange:String, ?options:AmpqDeleteExchangeOptions):Promise<{}>;
 	
 	/**
 	 * Bind an exchange to another exchange. The exchange named by destination will receive messages from the exchange named by source, according to the type of the source and the pattern given. For example, a direct exchange will relay messages that have a routing key equal to the pattern.
 	 * NB Exchange to exchange binding is a RabbitMQ extension.
 	 */
-	function bindExchange(destination:String, source:String, pattern:String, ?args:{}, ?callback:(AmqpError->{}->Void)):Void;
+	function bindExchange(destination:String, source:String, pattern:String, ?args:{}):Promise<{}>;
 	
 	/**
 	 * Remove a binding from an exchange to another exchange. A binding with the exact source exchange, destination exchange, routing key pattern, and extension args will be removed. If no such binding exists, it’s – you guessed it – a channel error, except in RabbitMQ >= version 3.2.0, for which it succeeds trivially.
 	 */
-	function unbindExchange(destination:String, source:String, pattern:String, ?args:{}, ?callback:(AmqpError->{}->Void)):Void;
+	function unbindExchange(destination:String, source:String, pattern:String, ?args:{}):Promise<{}>;
 	
 	
 	////////////////////////               MESSAGING
 	/*
 	 * Set up a consumer with a callback to be invoked with each message.
 	 */
-	function consume(queue:String, callback:AmqpMsg->Void, ?options:AmqpConsumeOptions, ?callback:AmqpError->{consumerTag:String}->Void):Void;
+	function consume(queue:String, callback:AmqpMsg->Void, ?options:AmqpConsumeOptions):Promise<{consumerTag:String}>;
 	
 	/*
 	 * Ask a queue for a message, as an RPC. This will be resolved with either false, if there is no message to be had (the queue has no messages ready), or a message in the same shape as detailed in #consume.
 	 */
-	function cancel(consumerTag:String, callback:AmqpError->{}->Void):Void;
+	function cancel(consumerTag:String):Promise<{}>;
 	
 	/*
 	 * This instructs the server to stop sending messages to the consumer identified by consumerTag. Messages may arrive between sending this and getting its reply; once the reply has resolved, however, there will be no more messages for the consumer, i.e., the message callback will no longer be invoked.
 	 * The consumerTag is the string given in the reply to #consume, which may have been generated by the server.
 	 */
-	function get(queue:String, ?options:AmqpGetOptions, callback:AmqpError->EitherType<Bool, AmqpMsg>->Void):Void;
+	function get(queue:String, ?options:AmqpGetOptions):Promise<EitherType<Bool, AmqpMsg>>;
 	
 	/*
 	 * Acknowledge the given message, or all messages up to and including the given message.
@@ -151,7 +152,7 @@ There’s not usually any reason to close a channel rather than continuing to us
 	/*
 	 * Requeue unacknowledged messages on this channel. The server will reply (with an empty object) once all messages are requeued.
 	 */
-	function recover(callback:AmqpError->{}->Void):Void;
+	function recover():Promise<{}>;
 }
 
 @:enum abstract AmqpChannelEvents(String){
@@ -185,8 +186,8 @@ typedef AmpqAssertQueueOptions =
 	?messageTtl:Int,			// (0 <= n < 2^32): expires messages arriving in the queue after n milliseconds
 	?expires:Int,				// (0 < n < 2^32): the queue will be destroyed after n milliseconds of disuse, where use means having consumers, being declared (asserted or checked, in this API), or being polled with a #get
 	?deadLetterExchange:String,	// an exchange to which messages discarded from the queue will be resent. Use deadLetterRoutingKey to set a routing key for discarded messages; otherwise, the message’s routing key (and CC and BCC, if present) will be preserved. A message is discarded when it expires or is rejected or nacked, or the queue limit is reached.
-	maxLength:UInt,				// sets a maximum number of messages the queue will hold. Old messages will be discarded (dead-lettered if that’s set) to make way for new messages.
-	maxPriority:UInt,			// makes the queue a priority queue.
+	?maxLength:UInt,				// sets a maximum number of messages the queue will hold. Old messages will be discarded (dead-lettered if that’s set) to make way for new messages.
+	?maxPriority:UInt,			// makes the queue a priority queue.
 }
 
 @:noCompletion

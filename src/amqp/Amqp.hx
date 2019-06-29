@@ -3,24 +3,16 @@ package amqp;
 import js.Promise;
 import haxe.extern.EitherType;
 
-class Amqp
-{
-	/*
-	 * Connect to an AMQP 0-9-1 server, optionally given an AMQP URL (see AMQP URI syntax) and socket options. The protocol part (amqp: or amqps:) is mandatory; defaults for elided parts are as given in 'amqp://guest:guest@localhost:5672'. If the URI is omitted entirely, it will default to 'amqp://localhost', which given the defaults for missing parts, will connect to a RabbitMQ installation with factory settings, on localhost.
-	 */
-	static inline public function connectCallback(url:AmqpUrl, ?options:{}, ?callback:AmqpError->AmqpConnection->Void):Void
-	{
-		AmqpCallback.connect(url, options, callback);
-	}
-}
-
 /**
  * ...
  * @author Thomas Byrne
  */
-@:jsRequire('amqplib/callback_api')
-extern private class AmqpCallback {
-	public static function connect(url:AmqpUrl, ?options:{}, ?callback:AmqpError->AmqpConnection->Void):Void;
+@:jsRequire('amqplib')
+extern class Amqp {
+	/*
+	 * Connect to an AMQP 0-9-1 server, optionally given an AMQP URL (see AMQP URI syntax) and socket options. The protocol part (amqp: or amqps:) is mandatory; defaults for elided parts are as given in 'amqp://guest:guest@localhost:5672'. If the URI is omitted entirely, it will default to 'amqp://localhost', which given the defaults for missing parts, will connect to a RabbitMQ installation with factory settings, on localhost.
+	 */
+	public static function connect(url:AmqpUrl, ?options:{}):Promise<AmqpConnection>;
 }
 
 typedef AmqpUrl = EitherType < String, {

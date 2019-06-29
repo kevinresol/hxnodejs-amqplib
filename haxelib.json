@@ -1,14 +1,14 @@
 {
-  "name": "AmqpExterns",
-  "url": "http://github.com/TomByrne/AmqpExternsHx",
+  "name": "hxnodejs-amqplib",
+  "url": "http://github.com/kevinresol/hxnodejs-amqplib",
   "license": "MIT",
-  "tags": ["amqp", "messaging", "messages", "queue", "rabbitmq"],
+  "tags": ["amqp", "amqplib", "messaging", "messages", "queue", "rabbitmq"],
   "description": "Externs for the NPM AMQP library 'amqplib'. JS only of course.",
-  "version": "0.0.8",
+  "version": "1.0.0",
   "releasenote": "",
-  "contributors": ["tbyrne"],
+  "contributors": ["kevinresol"],
   "classPath":"src",
   "dependencies": {
-	  "hxnodejs": "4.0.9"
+	  "hxnodejs": ""
   }
 }

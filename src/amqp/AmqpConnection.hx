@@ -1,5 +1,7 @@
 package amqp;
 
+import js.lib.Promise;
+
 /**
  * ...
  * @author Thomas Byrne
@@ -10,18 +12,18 @@ extern class AmqpConnection
 	 * Close the connection cleanly. Will immediately invalidate any unresolved operations, so it’s best to make sure you’ve done everything you need to before calling this. Will be resolved once the connection, and underlying socket, are closed. The model will also emit 'close' at that point.
 	 * Although it’s not strictly necessary, it will avoid some warnings in the server log if you close the connection before exiting
 	 */
-	function close(?callback:(String->Void)):Void;
+	function close():Promise<{}>;
 	function on(event:AmqpConnectionEvents, ?callback:(Dynamic->Void)):Void;
 	
 	/**
 	 * Resolves to an open Channel (The callback version returns the channel; but it is not usable before the callback has been invoked). May fail if there are no more channels available (i.e., if there are already channelMax channels open).
 	 */
-	function createChannel(callback:(AmqpError->AmqpChannel->Void)):Void;
+	function createChannel():Promise<AmqpChannel>
 	
 	/**
 	 * Open a fresh channel, switched to “confirmation mode”.
 	 */
-	function createConfirmChannel(callback:(AmqpError->AmqpConfirmChannel->Void)):Void;
+	function createConfirmChannel():Promise<AmqpConfirmChannel>
 }
 
 @:enum abstract AmqpConnectionEvents(String){

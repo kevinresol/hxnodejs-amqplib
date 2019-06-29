@@ -21,5 +21,5 @@ extern class AmqpConfirmChannel extends AmqpChannelBase
 	/*
 	 * Resolves the promise, or invokes the callback, when all published messages have been confirmed. If any of the messages has been nacked, this will result in an error; otherwise the result is no value. Either way, the channel is still usable afterwards. It is also possible to call waitForConfirms multiple times without waiting for previous invocations to complete.
 	 */
-	function waitForConfirms(callback:AmqpError->{}->Void):Bool;
+	function waitForConfirms():Promise<{}>;
 }
