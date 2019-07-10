@@ -1,6 +1,7 @@
 package amqp;
 
 import js.lib.Promise;
+import js.node.events.EventEmitter;
 import haxe.extern.EitherType;
 
 /**
@@ -22,7 +23,7 @@ extern class AmqpChannel extends AmqpChannelBase
 	function sendToQueue(queue:String, content:AmqpBuffer, ?options:{}):Bool;
 }
 
-extern class AmqpChannelBase 
+extern class AmqpChannelBase extends EventEmitter<AmqpChannelBase>
 {
 	/**
 	 * Close a channel. Will be resolved with no value once the closing handshake is complete.
@@ -30,8 +31,6 @@ extern class AmqpChannelBase
 There’s not usually any reason to close a channel rather than continuing to use it until you’re ready to close the connection altogether. However, the lifetimes of consumers are scoped to channels, and thereby other things such as exclusive locks on queues, so it is occasionally worth being deliberate about opening and closing channels.
 	 */
 	function close():Promise<{}>;
-	function on(event:AmqpChannelEvents, ?callback:(Void->Void)):Void;
-	
 	
 	////////////////////////               QUEUES
 	/**

@@ -3,4 +3,4 @@ package amqp;
 /**
  * @author Thomas Byrne
  */
-typedef AmqpError = String;
+typedef AmqpError = js.Error;
